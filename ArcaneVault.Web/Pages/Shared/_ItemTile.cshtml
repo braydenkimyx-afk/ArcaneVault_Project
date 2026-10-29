@@ -1,0 +1,51 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+@model (int ItemId, string CategoryCode, bool IsSmall, bool HasImage, string ItemName)
+@{
+    var baseClass = "av-tile";
+    var sizeClass = Model.IsSmall ? " av-tile--sm" : "";
+    var iconClass = "bi-gem"; 
+    var catClass = "av-tile--art"; // default fallback
+
+    switch (Model.CategoryCode?.ToUpper())
+    {
+        case "COINS":
+            catClass = "av-tile--coins";
+            iconClass = "bi-coin";
+            break;
+        case "STAMPS":
+            catClass = "av-tile--stamps";
+            iconClass = "bi-envelope-paper";
+            break;
+        case "CARDS":
+            catClass = "av-tile--cards";
+            iconClass = "bi-card-heading";
+            break;
+        case "FIGS":
+            catClass = "av-tile--figs";
+            iconClass = "bi-person-standing";
+            break;
+        case "BOOKS":
+            catClass = "av-tile--books";
+            iconClass = "bi-book";
+            break;
+        case "ART":
+            catClass = "av-tile--art";
+            iconClass = "bi-palette2";
+            break;
+    }
+}
+<div class="@(baseClass) @(catClass)@(sizeClass)" style="position: relative; overflow: hidden;">
+    <i class="bi @(iconClass)" @Html.Raw(Model.HasImage ? "style=\"display:none;\"" : "")></i>
+    
+    @if (Model.HasImage)
+    {
+        <img src="@(Config["ApiSettings:BaseUrl"])/api/collectionitems/@Model.ItemId/image"
+             style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1;"
+             onload="this.parentElement.querySelector('i').style.display='none';"
+             onerror="this.style.display='none'; this.parentElement.querySelector('i').style.display='';"
+             alt="@Model.ItemName" />
+    }
+</div>

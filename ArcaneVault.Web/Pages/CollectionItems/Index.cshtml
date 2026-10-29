@@ -1,0 +1,160 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.CollectionItems.IndexModel
+@{ 
+    ViewData["Title"] = User.IsInRole("Staff") ? "All Collections" : "My Collection"; 
+    var pageHeading = User.IsInRole("Staff") ? "All Collections" : "My Collection";
+    var pageSubtitle = User.IsInRole("Staff") ? "Every item catalogued across the platform" : "Items you've catalogued";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 fade-in">
+    <div>
+        <h1 id="pageHeadingTitle" class="mb-1"><i class="bi bi-collection me-2" style="color:var(--av-accent);"></i>@pageHeading</h1>
+        <p class="mb-0" style="color: var(--av-text-subtle);">@pageSubtitle</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>Add Item</a>
+</div>
+
+<div class="card mb-4 fade-in">
+    <div class="card-body py-2 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <form method="get" class="d-flex gap-2 mb-0" style="flex: 1; min-width: 200px;">
+            <input type="text" name="q" value="@Model.SearchQuery" class="form-control" placeholder="Search items..." />
+            <button type="submit" class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+            @if (!string.IsNullOrEmpty(Model.SearchQuery))
+            {
+                <a asp-page="Index" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+            }
+        </form>
+        @if (User.IsInRole("Staff") && Model.Items.Count > 0)
+        {
+            <div class="d-flex align-items-center gap-2">
+                <label for="ownerFilter" class="form-label mb-0 nowrap text-nowrap"><i class="bi bi-person-badge me-1"></i>Filter by Owner:</label>
+                <select id="ownerFilter" class="form-select form-select-sm w-auto" onchange="filterOwners(this.value)">
+                    <option value="">All owners</option>
+                    @foreach (var u in Model.Items.Select(x => x.UserName).Distinct().OrderBy(x => x))
+                    {
+                        <option value="@u">@u</option>
+                    }
+                </select>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty-state"><i class="bi bi-collection"></i><h4>No items found</h4><p>@(string.IsNullOrEmpty(Model.SearchQuery) ? "Start building your collection!" : "No items match your search.")</p></div>
+}
+else
+{
+    @if (User.IsInRole("Staff"))
+    {
+        <div class="alert mb-3" style="background-color: var(--av-accent-soft); border: 1px solid var(--av-accent-border); color: var(--av-text);">
+            <i class="bi bi-info-circle me-2"></i>Staff view — showing items from all collectors. Use the owner filter to narrow by user.
+        </div>
+    }
+    <div class="card fade-in">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead style="position: sticky; top: 0; z-index: 10; background-color: var(--av-surface);">
+                        <tr>
+                            <th style="width: 75px;">Image</th>
+                            <th>#</th>
+                            <th>Item Name</th>
+                            <th>Qty (Start)</th>
+                            <th>Qty (Current)</th>
+                            <th>Price</th>
+                            <th>Categories</th>
+                            <th>Owner</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        var pctRemaining = item.StartingQuantity > 0 ? (double)item.CurrentQuantity / item.StartingQuantity * 100 : 0;
+                        <tr class="@(pctRemaining <= 20 ? "low-stock" : "")" data-owner="@item.UserName">
+                            <td>
+                                <partial name="_ItemTile" model="@((item.ItemId, item.Categories.FirstOrDefault()?.CategoryCode ?? "ART", true, item.HasImage, item.ItemName))" />
+                            </td>
+                            <td class="align-middle">@item.ItemId</td>
+                            <td class="align-middle">
+                                @item.ItemName
+                                @if (pctRemaining <= 20 && item.StartingQuantity > 0) { <span class="badge bg-danger ms-1">Low</span> }
+                            </td>
+                            <td class="align-middle">@item.StartingQuantity</td>
+                            <td class="align-middle">
+                                <span class="@(pctRemaining <= 20 ? "text-danger fw-bold" : pctRemaining <= 50 ? "text-warning" : "text-success")">@item.CurrentQuantity</span>
+                            </td>
+                            <td class="align-middle fw-semibold">@(item.Price.HasValue ? item.Price.Value.ToString("C") : "—")</td>
+                            <td class="align-middle">
+                                @foreach (var cat in item.Categories)
+                                {
+                                    <span class="badge badge-category me-1">@cat.CategoryCode</span>
+                                }
+                            </td>
+                            <td class="align-middle">
+                                @if (User.IsInRole("Staff"))
+                                {
+                                    <span class="badge" style="background-color: var(--av-accent-soft); color: var(--av-accent);">@item.UserName</span>
+                                }
+                                else
+                                {
+                                    <span style="color: var(--av-text-muted);">@item.UserName</span>
+                                }
+                            </td>
+                            <td class="text-end align-middle">
+                                <a asp-page="Details" asp-route-id="@item.ItemId" class="btn btn-sm btn-outline-info me-1" title="View Details"><i class="bi bi-eye"></i><span class="d-none d-sm-inline ms-1">View</span></a>
+                                @if (item.UserName == User.Identity?.Name)
+                                {
+                                    <a asp-page="Edit" asp-route-id="@item.ItemId" class="btn btn-sm btn-outline-warning me-1" title="Edit Item"><i class="bi bi-pencil"></i><span class="d-none d-sm-inline ms-1">Edit</span></a>
+                                }
+                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="@item.ItemId" data-name="@item.ItemName" title="Delete Item"><i class="bi bi-trash"></i><span class="d-none d-sm-inline ms-1">Delete</span></button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirm Delete</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">Are you sure you want to delete <strong id="deleteItemName"></strong>? This is a soft delete — the item can be recovered.</div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" asp-page="Delete"><input type="hidden" name="id" id="deleteId" /><button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Delete</button></form>
+    </div>
+</div></div></div>
+
+@section Scripts {
+    <script>
+        document.getElementById('deleteModal')?.addEventListener('show.bs.modal', function (e) {
+            document.getElementById('deleteId').value = e.relatedTarget.dataset.id;
+            document.getElementById('deleteItemName').textContent = e.relatedTarget.dataset.name;
+        });
+
+        function filterOwners(owner) {
+            const defaultHeading = "All Collections";
+            const headingEl = document.getElementById('pageHeadingTitle');
+            if (headingEl) {
+                headingEl.innerHTML = '<i class="bi bi-collection me-2" style="color:var(--av-accent);"></i>' + (owner ? defaultHeading + ' — ' + owner : defaultHeading);
+            }
+
+            document.querySelectorAll('tbody tr').forEach(row => {
+                if (!owner || row.dataset.owner === owner) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}

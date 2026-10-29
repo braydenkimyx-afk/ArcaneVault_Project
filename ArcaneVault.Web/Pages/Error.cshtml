@@ -1,0 +1,20 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.ErrorModel
+@{ ViewData["Title"] = "Error"; Layout = "_Layout"; }
+
+<div class="text-center py-5 fade-in">
+    <i class="bi bi-exclamation-diamond display-1 text-danger mb-3"></i>
+    <h1 class="display-6 fw-bold">Oops! Something Went Wrong</h1>
+    <p class="text-muted mb-4">An unexpected error occurred. Please try again later.</p>
+
+    @if (Model.ShowRequestId)
+    {
+        <p class="text-muted"><small>Request ID: <code>@Model.RequestId</code></small></p>
+    }
+
+    <a asp-page="/Index" class="btn btn-primary"><i class="bi bi-house me-2"></i>Return Home</a>
+</div>

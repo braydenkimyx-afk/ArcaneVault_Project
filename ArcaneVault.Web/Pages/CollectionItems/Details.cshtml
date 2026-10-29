@@ -1,0 +1,58 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page "{id:int}"
+@model ArcaneVault.Web.Pages.CollectionItems.DetailsModel
+@{ ViewData["Title"] = "Item Details"; }
+
+<div class="row justify-content-center fade-in"><div class="col-md-7">
+    @if (Model.Item == null)
+    {
+        <div class="alert alert-warning">Item not found.</div>
+    }
+    else
+    {
+        var pct = Model.Item.StartingQuantity > 0 ? (double)Model.Item.CurrentQuantity / Model.Item.StartingQuantity * 100 : 0;
+        <div class="card shadow">
+            <div class="card-header py-3"><h4 class="mb-0" style="color: var(--av-text);">@Model.Item.ItemName</h4></div>
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center mb-4 mb-md-0">
+                        <div style="max-width: 200px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 12px; overflow: hidden; transform: rotate(-2deg);">
+                            <partial name="_ItemTile" model="@((Model.Item.ItemId, Model.Item.Categories.FirstOrDefault()?.CategoryCode ?? "ART", false, Model.Item.HasImage, Model.Item.ItemName))" />
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <dl class="row mb-0">
+                    <dt class="col-sm-4">Item ID</dt><dd class="col-sm-8">@Model.Item.ItemId</dd>
+                    <dt class="col-sm-4">Price</dt><dd class="col-sm-8 fw-semibold">@(Model.Item.Price.HasValue ? Model.Item.Price.Value.ToString("C") : "—")</dd>
+                    <dt class="col-sm-4">Starting Qty</dt><dd class="col-sm-8">@Model.Item.StartingQuantity</dd>
+                    <dt class="col-sm-4">Current Qty</dt>
+                    <dd class="col-sm-8">
+                        <span class="@(pct <= 20 ? "text-danger fw-bold" : pct <= 50 ? "text-warning" : "text-success")">@Model.Item.CurrentQuantity</span>
+                        <small class="text-muted">(@pct.ToString("F0")% remaining)</small>
+                    </dd>
+                    <dt class="col-sm-4">Owner</dt><dd class="col-sm-8">@Model.Item.UserName</dd>
+                    <dt class="col-sm-4">Categories</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Item.Categories.Count == 0) { <span class="text-muted">None</span> }
+                        else { foreach (var c in Model.Item.Categories) { <span class="badge badge-category me-1">@c.CategoryCode — @c.CategoryName</span> } }
+                    </dd>
+                </dl>
+                <!-- Progress bar for quantity -->
+                <div class="mt-3">
+                    <div class="progress" style="height:10px; background-color:var(--av-surface-raised);">
+                        <div class="progress-bar @(pct <= 20 ? "bg-danger" : pct <= 50 ? "bg-warning" : "bg-success")" style="width:@pct%"></div>
+                    </div>
+                </div>
+                        </div>
+                    </div>
+                </div>
+            <div class="card-footer d-flex gap-2">
+                <a asp-page="Edit" asp-route-id="@Model.Item.ItemId" class="btn btn-warning btn-sm"><i class="bi bi-pencil me-1"></i>Edit</a>
+                <a asp-page="Index" class="btn btn-secondary btn-sm">Back</a>
+            </div>
+        </div>
+    }
+</div></div>

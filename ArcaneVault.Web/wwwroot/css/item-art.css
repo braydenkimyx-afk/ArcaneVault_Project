@@ -1,0 +1,115 @@
+/* 
+ * ArcaneVault CSS-Generated Artwork Collection System
+ * Replaces hardcoded images with CSS-drawn tiles keyed off category mappings.
+ */
+
+.av-tile {
+    position: relative;
+    aspect-ratio: 5 / 7;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--av-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.av-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.9;
+}
+
+/* Gradient Scrim for text readability */
+.av-tile::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.45));
+    pointer-events: none;
+}
+
+/* Base Icon Container */
+.av-tile i {
+    z-index: 2;
+    font-size: 2.75rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Category: COINS */
+/* Linear gradient base, radial gradient ring overlay */
+.av-tile--coins {
+    background: linear-gradient(145deg, #fbbf24, #d97706);
+}
+
+.av-tile--coins::before {
+    background: radial-gradient(circle, transparent 40%, rgba(255, 255, 255, 0.25) 42%, rgba(255, 255, 255, 0.3) 45%, transparent 50%);
+}
+
+/* Category: STAMPS */
+/* Linear gradient base, repeating radial edge */
+.av-tile--stamps {
+    background: linear-gradient(145deg, #f472b6, #be185d);
+}
+
+.av-tile--stamps::before {
+    background: repeating-radial-gradient(circle at 10px 10px, rgba(255, 255, 255, 0.2) 0, rgba(255, 255, 255, 0.2) 2px, transparent 3px, transparent 15px);
+    background-size: 20px 20px;
+    opacity: 0.4;
+}
+
+/* Category: CARDS */
+/* Blue base, repeating linear foil sheen */
+.av-tile--cards {
+    background: linear-gradient(145deg, #60a5fa, #1d4ed8);
+}
+
+.av-tile--cards::before {
+    background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0px, rgba(255, 255, 255, 0.08) 10px, transparent 10.5px, transparent 20px);
+}
+
+/* Category: FIGS */
+/* Purple base, radial spotlight */
+.av-tile--figs {
+    background: linear-gradient(145deg, #a78bfa, #6d28d9);
+}
+
+.av-tile--figs::before {
+    background: radial-gradient(circle at top center, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+}
+
+/* Category: BOOKS */
+/* Orange base, spine stripe */
+.av-tile--books {
+    background: linear-gradient(145deg, #fb923c, #c2410c);
+}
+
+.av-tile--books::before {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.15) 15%, rgba(0, 0, 0, 0.05) 16%, transparent 20%);
+}
+
+/* Category: ART */
+/* Emerald tree base, frame border inset */
+.av-tile--art {
+    background: linear-gradient(145deg, #34d399, #047857);
+}
+
+.av-tile--art::before {
+    border: 8px solid rgba(255, 255, 255, 0.15);
+    margin: 8px;
+    border-radius: 4px;
+    background: none;
+}
+
+/* Small modifier for table rows */
+.av-tile.av-tile--sm {
+    width: 60px;
+    /* Instead of flex, explicit sizing ensures constraint */
+    aspect-ratio: 5 / 7;
+}
+
+.av-tile.av-tile--sm i {
+    font-size: 1.25rem;
+}

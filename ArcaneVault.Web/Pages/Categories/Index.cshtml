@@ -1,0 +1,62 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.Categories.IndexModel
+@{ ViewData["Title"] = "Category Management"; }
+
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <h1><i class="bi bi-tags me-2" style="color:var(--av-accent);"></i>Category Management</h1>
+    <a asp-page="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-2"></i>New Category</a>
+</div>
+
+@if (Model.Categories.Count == 0)
+{
+    <div class="empty-state"><i class="bi bi-tags"></i><h4>No categories yet</h4><p>Create your first category to get started.</p></div>
+}
+else
+{
+    <div class="card fade-in">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Code</th><th>Name</th><th class="text-end">Actions</th></tr></thead>
+                    <tbody>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <tr>
+                            <td><span class="badge badge-category">@cat.CategoryCode</span></td>
+                            <td>@cat.CategoryName</td>
+                            <td class="text-end">
+                                <a asp-page="Details" asp-route-code="@cat.CategoryCode" class="btn btn-sm btn-outline-info me-1" title="View Details"><i class="bi bi-eye"></i><span class="d-none d-sm-inline ms-1">View</span></a>
+                                <a asp-page="Edit" asp-route-code="@cat.CategoryCode" class="btn btn-sm btn-outline-warning me-1" title="Edit Category"><i class="bi bi-pencil"></i><span class="d-none d-sm-inline ms-1">Edit</span></a>
+                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-code="@cat.CategoryCode" data-name="@cat.CategoryName" title="Delete Category"><i class="bi bi-trash"></i><span class="d-none d-sm-inline ms-1">Delete</span></button>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Confirm Delete</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">Are you sure you want to delete category <strong id="deleteCategoryName"></strong>?</div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" asp-page="Delete" id="deleteForm"><input type="hidden" name="code" id="deleteCode" /><button type="submit" class="btn btn-danger"><i class="bi bi-trash me-2"></i>Delete</button></form>
+    </div>
+</div></div></div>
+
+@section Scripts {
+    <script>
+        document.getElementById('deleteModal')?.addEventListener('show.bs.modal', function (e) {
+            document.getElementById('deleteCode').value = e.relatedTarget.dataset.code;
+            document.getElementById('deleteCategoryName').textContent = e.relatedTarget.dataset.name;
+        });
+    </script>
+}

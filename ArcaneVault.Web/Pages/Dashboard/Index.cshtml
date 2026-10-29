@@ -1,0 +1,240 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.Dashboard.IndexModel
+@{ ViewData["Title"] = "Dashboard"; }
+
+<h1 class="mb-4 fade-in"><i class="bi bi-bar-chart me-2" style="color:var(--av-accent);"></i>Analytics Dashboard</h1>
+
+@if (Model.Dashboard == null)
+{
+    <div class="alert alert-warning">Unable to load dashboard data.</div>
+}
+else
+{
+    <!-- KPI Cards -->
+    <div class="row g-4 mb-4 fade-in">
+        <div class="col-md-3"><div class="kpi-card"><div class="kpi-value">@Model.Dashboard.TotalItems</div><div class="kpi-label"><i class="bi bi-collection me-1"></i>Total Items</div></div></div>
+        <div class="col-md-3"><div class="kpi-card"><div class="kpi-value">@Model.Dashboard.TotalQuantity</div><div class="kpi-label"><i class="bi bi-box me-1"></i>Total Quantity</div></div></div>
+        <div class="col-md-3"><div class="kpi-card"><div class="kpi-value">@Model.Dashboard.CategoriesUsed</div><div class="kpi-label"><i class="bi bi-tags me-1"></i>Categories Used</div></div></div>
+        <div class="col-md-3"><div class="kpi-card"><div class="kpi-value">@Model.Dashboard.DepletionRate.ToString("F1")%</div><div class="kpi-label"><i class="bi bi-graph-down me-1"></i>Avg Depletion</div></div></div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4 fade-in">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><h6 class="mb-0" style="color: var(--av-text);"><i class="bi bi-pie-chart me-2"></i>Category Distribution</h6></div>
+                <div class="card-body d-flex align-items-center justify-content-center"><canvas id="categoryDoughnutChart" style="max-height:300px;"></canvas></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><h6 class="mb-0" style="color: var(--av-text);"><i class="bi bi-bar-chart-line me-2"></i>Top Categories</h6></div>
+                <div class="card-body">
+                    <canvas id="topCategoriesChart" style="max-height:300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Depletion Chart -->
+    <div class="card mb-4 fade-in">
+        <div class="card-header"><h6 class="mb-0" style="color: var(--av-text);"><i class="bi bi-activity me-2"></i>Quantity Depletion (Top 10)</h6></div>
+        <div class="card-body"><canvas id="depletionChart" style="max-height:350px;"></canvas></div>
+    </div>
+
+    <!-- Type Completion Tracker -->
+    @if (Model.Completion != null && Model.Completion.TotalCategories > 0)
+    {
+        <div class="card mb-4 fade-in">
+            <div class="card-header">
+                <h6 class="mb-0" style="color: var(--av-text);">
+                    <i class="bi bi-check2-square me-2"></i>Type Completion Tracker
+                    <span class="badge bg-primary ms-2">@Model.Completion.CompletionPercentage.ToString("F0")%</span>
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">@Model.Completion.Categories.Count(c => c.Owned) of @Model.Completion.TotalCategories categories covered</small>
+                        <small class="fw-bold">@Model.Completion.CompletionPercentage.ToString("F1")%</small>
+                    </div>
+                    <div class="progress" style="height: 12px; background-color: var(--av-border);">
+                        <div class="progress-bar @(Model.Completion.CompletionPercentage >= 100 ? "bg-success" : Model.Completion.CompletionPercentage >= 50 ? "bg-primary" : "bg-warning")"
+                             role="progressbar"
+                             style="width: @Model.Completion.CompletionPercentage%"
+                             aria-valuenow="@Model.Completion.CompletionPercentage"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var cat in Model.Completion.Categories)
+                    {
+                        <li class="list-group-item d-flex align-items-center px-0 py-1" style="background: transparent; border-color: var(--av-border);">
+                            @if (cat.Owned)
+                            {
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-x-circle text-danger me-2"></i>
+                            }
+                            <span style="color: var(--av-text);">@cat.CategoryName</span>
+                            <small class="text-muted ms-1">(@cat.CategoryCode)</small>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+
+    <!-- Low Stock Alerts -->
+    @if (Model.Dashboard.LowStockItems?.Count > 0)
+    {
+        <div class="card fade-in">
+            <div class="card-header bg-danger bg-opacity-10"><h6 class="mb-0" style="color: var(--av-text);"><i class="bi bi-exclamation-triangle me-2 text-danger"></i>Low Stock Alerts (≤ 20% remaining)</h6></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead><tr><th style="width: 75px;">Art</th><th>Item</th><th>Starting</th><th>Current</th><th>% Remaining</th></tr></thead>
+                        <tbody>
+                        @foreach (var item in Model.Dashboard.LowStockItems)
+                        {
+                            <tr class="low-stock">
+                                <td>
+                                    <partial name="_ItemTile" model="@((item.ItemId, "ART", true, item.HasImage, item.ItemName))" />
+                                </td>
+                                <td class="align-middle">@item.ItemName</td>
+                                <td class="align-middle">@item.StartingQuantity</td>
+                                <td class="text-danger fw-bold align-middle">@item.CurrentQuantity</td>
+                                <td class="align-middle">
+                                    <div class="progress" style="height:8px;width:100px;background-color:var(--av-border);display:inline-flex;">
+                                        <div class="progress-bar bg-danger" style="width:@item.PercentRemaining%"></div>
+                                    </div>
+                                    <small class="ms-2">@item.PercentRemaining.ToString("F0")%</small>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- CSV Export -->
+    <div class="text-end mt-3 fade-in">
+        <a asp-page-handler="ExportCsv" class="btn btn-outline-primary"><i class="bi bi-download me-2"></i>Export CSV</a>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+        // Global Chart.js defaults for Light theme
+        Chart.defaults.color = '#475569';
+        Chart.defaults.borderColor = '#e2e8f0';
+        Chart.defaults.scale = Chart.defaults.scale || {};
+        Chart.defaults.scale.grid = { color: '#f1f5f9' };
+
+        // Standard palette ordered for white backgrounds
+        const palette = ['#2563eb', '#7c3aed', '#0891b2', '#ea580c', '#dc2626', '#15803d'];
+
+        // Helper to extract numeric values safely (handles camelCase or PascalCase)
+        function extractNums(arr, key1, key2) {
+            return arr.map(c => {
+                const val = c[key1] !== undefined ? c[key1] : c[key2];
+                return (val === null || val === undefined) ? 0 : Number(val);
+            });
+        }
+
+        // Category Distribution Doughnut
+        const catData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Dashboard?.CategoryDistribution ?? new()));
+        if (catData && catData.length > 0) {
+            new Chart(document.getElementById('categoryDoughnutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: catData.map(c => c.categoryName || c.CategoryName || "Unknown"),
+                    datasets: [{ data: extractNums(catData, 'itemCount', 'ItemCount'), backgroundColor: palette, borderColor: '#ffffff', borderWidth: 2 }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { padding: 12 } }, tooltip: { mode: 'index' } } }
+            });
+        }
+
+        // Top Categories Bar
+        const topData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Dashboard?.TopCategories ?? new()));
+        if (topData && topData.length > 0) {
+            new Chart(document.getElementById('topCategoriesChart'), {
+                type: 'polarArea',
+                data: {
+                    labels: topData.map(c => c.categoryName || c.CategoryName || "Unknown"),
+                    datasets: [{ 
+                        label: 'Items', 
+                        data: topData.map(c => Number(c.itemCount ?? c.ItemCount ?? 0)), 
+                        backgroundColor: palette, 
+                        borderWidth: 1,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            ticks: { display: false, stepSize: 1 },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
+                    },
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } }, 
+                        tooltip: { mode: 'index' } 
+                    } 
+                }
+            });
+        }
+
+        // Depletion Chart (Line)
+        const depData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Dashboard?.QuantityDepletion ?? new()));
+        if (depData && depData.length > 0) {
+            new Chart(document.getElementById('depletionChart'), {
+                type: 'line',
+                data: {
+                    labels: depData.map(c => c.itemName || c.ItemName || "Unknown"),
+                    datasets: [
+                        { 
+                            label: 'Starting', 
+                            data: extractNums(depData, 'startingQuantity', 'StartingQuantity'), 
+                            borderColor: '#38bdf8',
+                            backgroundColor: '#38bdf8',
+                            fill: false,
+                            tension: 0.3,
+                            borderWidth: 2
+                        },
+                        { 
+                            label: 'Current', 
+                            data: extractNums(depData, 'currentQuantity', 'CurrentQuantity'), 
+                            borderColor: '#10b981',
+                            backgroundColor: '#10b981',
+                            fill: false,
+                            tension: 0.3,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: { 
+                    responsive: true, 
+                    scales: { 
+                        y: { beginAtZero: true }, 
+                        x: { ticks: { maxRotation: 45 }, grid: { display: false } } 
+                    }, 
+                    plugins: { tooltip: { mode: 'index' } } 
+                }
+            });
+        }
+    </script>
+}

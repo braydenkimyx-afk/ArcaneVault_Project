@@ -1,0 +1,41 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page "{id:int?}"
+@model ArcaneVault.Web.Pages.CollectionItems.DeleteModel
+@{ ViewData["Title"] = "Delete Item"; }
+
+<div class="row justify-content-center fade-in"><div class="col-md-6">
+    @if (Model.Item == null)
+    {
+        <div class="alert alert-warning">Item not found.</div>
+    }
+    else
+    {
+        <div class="card shadow border-danger">
+            <div class="card-header py-3 d-flex align-items-center">
+                <div class="d-inline-block me-3" style="width: 40px;">
+                    <partial name="_ItemTile" model="@((Model.Item.ItemId, Model.Item.Categories.FirstOrDefault()?.CategoryCode ?? "ART", true, Model.Item.HasImage, Model.Item.ItemName))" />
+                </div>
+                <h4 class="mb-0 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete</h4>
+            </div>
+            <div class="card-body p-4">
+                <p>Are you sure you want to delete <strong>@Model.Item.ItemName</strong>? This is a soft delete — the item can be recovered later if needed.</p>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Item ID</dt><dd class="col-sm-8">@Model.Item.ItemId</dd>
+                    <dt class="col-sm-4">Starting Qty</dt><dd class="col-sm-8">@Model.Item.StartingQuantity</dd>
+                    <dt class="col-sm-4">Current Qty</dt><dd class="col-sm-8">@Model.Item.CurrentQuantity</dd>
+                    <dt class="col-sm-4">Owner</dt><dd class="col-sm-8">@Model.Item.UserName</dd>
+                </dl>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <form method="post">
+                    <input type="hidden" name="id" value="@Model.Item.ItemId" />
+                    <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash me-1"></i>Delete</button>
+                </form>
+                <a asp-page="Index" class="btn btn-secondary btn-sm">Cancel</a>
+            </div>
+        </div>
+    }
+</div></div>

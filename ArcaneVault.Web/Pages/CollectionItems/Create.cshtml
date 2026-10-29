@@ -1,0 +1,114 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.CollectionItems.CreateModel
+@{ ViewData["Title"] = "Add Item"; }
+
+<div class="row justify-content-center fade-in"><div class="col-md-7">
+    <div class="card shadow">
+        <div class="card-header py-3"><h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Add Collection Item</h4></div>
+        <div class="card-body p-4">
+            <form method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.ItemName" class="form-label"></label>
+                    <input asp-for="Input.ItemName" class="form-control" placeholder="e.g. Charizard Holo PSA 10" />
+                    <span asp-validation-for="Input.ItemName" class="text-danger"></span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label asp-for="Input.StartingQuantity" class="form-label"></label>
+                        <input asp-for="Input.StartingQuantity" class="form-control" type="number" min="0" id="startQty" />
+                        <span asp-validation-for="Input.StartingQuantity" class="text-danger"></span>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="Input.CurrentQuantity" class="form-label"></label>
+                        <input asp-for="Input.CurrentQuantity" class="form-control" type="number" min="0" id="currQty" />
+                        <span asp-validation-for="Input.CurrentQuantity" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Price" class="form-label"></label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="Input.Price" class="form-control" type="number" min="0" step="0.01" placeholder="e.g. 29.99 (leave blank if unknown)" />
+                    </div>
+                    <span asp-validation-for="Input.Price" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Categories</label>
+                    @foreach (var cat in Model.AvailableCategories)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="Input.CategoryCodes" value="@cat.CategoryCode" id="cat_@cat.CategoryCode" />
+                            <label class="form-check-label" for="cat_@cat.CategoryCode">
+                                <span class="badge badge-category me-1">@cat.CategoryCode</span> @cat.CategoryName
+                            </label>
+                        </div>
+                    }
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ImageFile" class="form-label fw-bold">Item photo (optional)</label>
+                    <input type="file" asp-for="ImageFile" accept="image/jpeg,image/png" class="form-control" id="imgUpload" />
+                    <div class="form-text" style="color: var(--av-text-subtle);">JPEG or PNG, max 2MB. Leave empty to use a category tile.</div>
+                    <span asp-validation-for="ImageFile" class="text-danger small"></span>
+                    <div id="imgPreviewContainer" class="mt-2 d-none">
+                        <img id="imgPreview" src="" class="rounded border shadow-sm" style="max-width: 160px; height: auto;" />
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-2"></i>Create</button>
+                    <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div></div>
+
+@section Scripts {
+    <script>
+        document.getElementById('startQty')?.addEventListener('input', function () {
+            const curr = document.getElementById('currQty');
+            if (!curr.value || parseInt(curr.value) > parseInt(this.value)) curr.value = this.value;
+        });
+
+        document.getElementById('imgUpload')?.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const container = document.getElementById('imgPreviewContainer');
+            const preview = document.getElementById('imgPreview');
+            
+            const prevError = document.getElementById('imgError');
+            if (prevError) prevError.remove();
+
+            if (!file) {
+                container.classList.add('d-none');
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                e.target.value = '';
+                container.classList.add('d-none');
+                e.target.parentElement.insertAdjacentHTML('beforeend', '<div id="imgError" class="text-danger mt-1 small">Image exceeds 2MB limit.</div>');
+                return;
+            }
+
+            if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+                e.target.value = '';
+                container.classList.add('d-none');
+                e.target.parentElement.insertAdjacentHTML('beforeend', '<div id="imgError" class="text-danger mt-1 small">Only JPEG and PNG are allowed.</div>');
+                return;
+            }
+
+            preview.src = URL.createObjectURL(file);
+            container.classList.remove('d-none');
+        });
+    </script>
+}

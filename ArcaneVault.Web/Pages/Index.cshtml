@@ -1,0 +1,528 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+@section Scripts {
+    <style>
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--av-accent-border);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+        }
+        .stats-strip {
+            background-color: var(--av-surface-raised);
+            border-radius: 1rem;
+            border: 1px solid var(--av-border);
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--av-text);
+            margin-bottom: 0.25rem;
+        }
+        .stat-label {
+            color: var(--av-text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.85rem;
+        }
+        
+        .btn-hero-primary {
+            background-color: #ffffff;
+            color: var(--av-accent);
+            font-weight: 600;
+            border: none;
+        }
+        .btn-hero-primary:hover {
+            background-color: #f8fafc;
+            color: var(--av-accent-hover);
+        }
+        
+        .btn-hero-secondary {
+            background-color: transparent;
+            color: #ffffff;
+            border: 2px solid rgba(255,255,255,0.5);
+            font-weight: 600;
+        }
+        .btn-hero-secondary:hover {
+            background-color: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.8);
+            color: #ffffff;
+        }
+
+        /* Hero Carousel Styling */
+        .home-hero-slide {
+            min-height: 380px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .slide-eyebrow {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .carousel-indicators [data-bs-target] {
+            width: 28px;
+            height: 3px;
+            border-radius: 2px;
+            background-color: rgba(255,255,255,0.4);
+            border: none;
+        }
+        .carousel-indicators .active {
+            background-color: #ffffff;
+        }
+        
+        .av-carousel-control {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            transition: background 0.2s;
+            cursor: pointer;
+            color: #ffffff;
+            text-decoration: none;
+        }
+        .av-carousel-control:hover {
+            background-color: rgba(255,255,255,0.3);
+            color: #ffffff;
+        }
+
+        @@keyframes float-simple {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        @@keyframes grow-bar {
+            0% { transform: scaleY(0.2); }
+            100% { transform: scaleY(1); }
+        }
+
+        /* Mock Chart Items */
+        .mock-bar {
+            width: 28px;
+            background: rgba(255,255,255,0.85);
+            border-radius: 14px 14px 0 0;
+            transform-origin: bottom;
+            animation: grow-bar 2s ease-out forwards;
+        }
+        
+        .mock-doughnut {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(
+                rgba(255,255,255,0.9) 0deg 90deg, 
+                transparent 90deg 92deg,
+                rgba(255,255,255,0.6) 92deg 170deg, 
+                transparent 170deg 172deg,
+                rgba(255,255,255,0.4) 172deg 260deg, 
+                transparent 260deg 262deg,
+                rgba(255,255,255,0.2) 262deg 358deg,
+                transparent 358deg 360deg
+            );
+        }
+        .mock-doughnut::before {
+            content: '';
+            position: absolute;
+            inset: 20px;
+            background: #0369a1;
+            border-radius: 50%;
+        }
+
+        .hero-art-fanned .av-tile {
+            position: absolute;
+            width: 140px;
+            box-shadow: 0 18px 36px rgba(0,0,0,0.35);
+            animation: float-simple 7s ease-in-out infinite;
+        }
+        
+        .security-pill {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 50rem;
+            padding: 0.5rem 1rem;
+            color: #ffffff;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        @@media (max-width: 991.98px) {
+            .home-hero-slide { min-height: 280px; text-align: center; }
+            .hero-right-col { display: none !important; }
+            .hero-left-col { width: 100% !important; align-items: center; }
+        }
+
+        /* Showcase Row */
+        .showcase-row-container {
+            position: relative;
+        }
+        .showcase-row {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            padding-bottom: 1rem;
+        }
+        .showcase-card {
+            flex: 0 0 200px;
+            scroll-snap-align: start;
+            background: #ffffff;
+            border: 1px solid var(--av-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .showcase-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(37,99,235,0.12);
+        }
+        .showcase-card .av-tile {
+            width: 100%;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        
+        .scroller-btn {
+            background: #ffffff;
+            border: 1px solid var(--av-border);
+            color: var(--av-text-muted);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .scroller-btn:hover {
+            color: var(--av-accent);
+            border-color: var(--av-accent);
+        }
+        .scroller-btn.prev { left: -20px; }
+        .scroller-btn.next { right: -20px; }
+
+        /* Promo Tiles */
+        .promo-tile {
+            min-height: 200px;
+            border-radius: 14px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 2.5rem;
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .item-row-sm-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            opacity: 0.3;
+        }
+    </style>
+}
+
+<!-- HERO CAROUSEL -->
+<div id="homeHeroCarousel" class="carousel slide carousel-fade mb-5 fade-in" data-bs-ride="carousel" data-bs-interval="6000">
+    <div class="carousel-indicators mb-3">
+        <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="2"></button>
+    </div>
+
+    <div class="carousel-inner">
+        <!-- Slide 1: Welcome -->
+        <div class="carousel-item active">
+            <div class="home-hero-slide" style="background: linear-gradient(120deg, #1e3a8a 0%, #2563eb 55%, #3b82f6 100%);">
+                <div class="container d-flex flex-column flex-lg-row h-100 position-relative">
+                    <div class="hero-left-col col-lg-6 d-flex flex-column justify-content-center p-5">
+                        <div class="slide-eyebrow">COLLECTION MANAGEMENT</div>
+                        <h1 class="display-5 fw-bold mb-3">Welcome to ArcaneVault</h1>
+                        <p class="lead mb-4" style="max-width: 500px;">Your premium collection management system. Organize, track, and analyze your collectibles with ease.</p>
+                        
+                        @if (!User.Identity?.IsAuthenticated ?? true)
+                        {
+                            <div class="d-flex gap-3">
+                                <a asp-page="/Account/Login" class="btn btn-hero-primary px-4"><i class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+                                <a asp-page="/Account/Register" class="btn btn-hero-secondary px-4"><i class="bi bi-person-plus me-2"></i>Register</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex gap-3">
+                                <a asp-page="/CollectionItems/Index" class="btn btn-hero-primary px-4"><i class="bi bi-collection me-2"></i>My Collection</a>
+                                <a asp-page="/Dashboard/Index" class="btn btn-hero-secondary px-4"><i class="bi bi-bar-chart me-2"></i>Dashboard</a>
+                            </div>
+                        }
+                    </div>
+                    
+                    <div class="hero-right-col col-lg-6 d-flex flex-column justify-content-center align-items-center overflow-hidden position-relative">
+                        <div class="hero-art-fanned position-relative" style="width: 300px; height: 210px; margin-left: 20px;">
+                            <div style="left: -40px; top: 30px; transform: rotate(-16deg); animation-delay: 0s; z-index: 1; opacity: 0.85;">
+                                <partial name="_ItemTile" model="@((0, "CARDS", false, false, ""))" />
+                            </div>
+                            <div style="left: -2px; top: 10px; transform: rotate(-6deg); animation-delay: 0.6s; z-index: 2; opacity: 0.9;">
+                                <partial name="_ItemTile" model="@((0, "COINS", false, false, ""))" />
+                            </div>
+                            <div style="left: 36px; top: 20px; transform: rotate(5deg); animation-delay: 1.2s; z-index: 3; opacity: 0.95;">
+                                <partial name="_ItemTile" model="@((0, "BOOKS", false, false, ""))" />
+                            </div>
+                            <div style="left: 74px; top: 40px; transform: rotate(15deg); animation-delay: 1.8s; z-index: 4; opacity: 1;">
+                                <partial name="_ItemTile" model="@((0, "ART", false, false, ""))" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 2: Analytics -->
+        <div class="carousel-item">
+            <div class="home-hero-slide" style="background: linear-gradient(120deg, #0c4a6e 0%, #0369a1 60%, #0284c7 100%);">
+                <div class="container d-flex flex-column flex-lg-row h-100">
+                    <div class="hero-left-col col-lg-6 d-flex flex-column justify-content-center p-5">
+                        <div class="slide-eyebrow">INSIGHTS</div>
+                        <h2 class="display-5 fw-bold mb-3">Know your collection</h2>
+                        <p class="lead mb-4" style="max-width: 500px;">Get real-time insights matching depletion tracking against category trends and alerts.</p>
+                        <div class="d-flex">
+                            <a asp-page="/Dashboard/Index" class="btn btn-hero-primary px-4">View Dashboard</a>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-right-col col-lg-6 d-flex justify-content-center align-items-center gap-5 overflow-hidden">
+                        <div class="mock-doughnut position-relative" style="margin-top: 30px;"></div>
+                        <div class="d-flex align-items-end gap-2" style="height: 100px; margin-top: 30px;">
+                            <div class="mock-bar" style="height: 40px; animation-delay: 0.1s;"></div>
+                            <div class="mock-bar" style="height: 75px; animation-delay: 0.2s;"></div>
+                            <div class="mock-bar" style="height: 55px; animation-delay: 0.3s;"></div>
+                            <div class="mock-bar" style="height: 95px; animation-delay: 0.4s;"></div>
+                            <div class="mock-bar" style="height: 35px; animation-delay: 0.5s;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Security -->
+        <div class="carousel-item">
+            <div class="home-hero-slide" style="background: linear-gradient(120deg, #312e81 0%, #4338ca 60%, #4f46e5 100%);">
+                <div class="container d-flex flex-column flex-lg-row h-100">
+                    <div class="hero-left-col col-lg-6 d-flex flex-column justify-content-center p-5">
+                        <div class="slide-eyebrow">PROTECTED</div>
+                        <h2 class="display-5 fw-bold mb-3">Your vault, secured</h2>
+                        <p class="lead mb-4" style="max-width: 500px;">Enterprise-grade PBKDF2 hashing, aggressive 5-strike lockout policies, and role-based access logic natively.</p>
+                        <div class="d-flex">
+                            <a asp-page="/Account/Register" class="btn btn-hero-primary px-4">Create an account</a>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-right-col col-lg-6 d-flex justify-content-center align-items-center gap-4 overflow-hidden">
+                        <i class="bi bi-shield-lock" style="font-size: 8rem; color: rgba(255,255,255,0.18);"></i>
+                        <div class="d-flex flex-column">
+                            <span class="security-pill"><i class="bi bi-key me-2"></i>PBKDF2 + salt</span>
+                            <span class="security-pill"><i class="bi bi-slash-circle me-2"></i>5-strike lockout</span>
+                            <span class="security-pill"><i class="bi bi-person-badge me-2"></i>Role-based access</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carousel Controls (anchored bottom right) -->
+    <div class="position-absolute d-flex gap-2" style="bottom: 30px; right: 30px; z-index: 10;">
+        <a class="av-carousel-control" href="#homeHeroCarousel" role="button" data-bs-slide="prev">
+            <i class="bi bi-chevron-left fs-5"></i>
+        </a>
+        <a class="av-carousel-control" href="#homeHeroCarousel" role="button" data-bs-slide="next">
+            <i class="bi bi-chevron-right fs-5"></i>
+        </a>
+    </div>
+</div>
+
+<!-- FEATURE CARDS -->
+<div class="row g-4 mb-5 fade-in">
+    <div class="col-md-4">
+        <div class="card feature-card h-100 text-center p-4">
+            <div class="card-body">
+                <i class="bi bi-collection display-4 mb-3" style="color: var(--av-accent);"></i>
+                <h5 class="card-title text-heading">Organize</h5>
+                <p>Categorize your collectibles with flexible tagging and detailed item tracking.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card feature-card h-100 text-center p-4">
+            <div class="card-body">
+                <i class="bi bi-bar-chart display-4 mb-3" style="color: var(--av-accent);"></i>
+                <h5 class="card-title text-heading">Analyze</h5>
+                <p>Interactive charts and KPI cards to visualize your collection's health and growth.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card feature-card h-100 text-center p-4">
+            <div class="card-body">
+                <i class="bi bi-shield-lock display-4 mb-3" style="color: var(--av-accent);"></i>
+                <h5 class="card-title text-heading">Secure</h5>
+                <p>PBKDF2 hashed passwords, account lockout protection, and role-based access control.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SHOWCASE ROW -->
+<div class="mb-5 fade-in">
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <div>
+            <h2 class="mb-1" style="font-size: 1.5rem; color: var(--av-text); font-weight: 700;">Recently catalogued</h2>
+            <div style="color: var(--av-text-subtle);">A look at what collectors are tracking</div>
+        </div>
+        <a asp-page="/Browse/Index" style="color: var(--av-accent); font-weight: 600; text-decoration: none;">View all <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    @if (Model.RecentItems == null || !Model.RecentItems.Any())
+    {
+        <div class="text-center p-5" style="background: #ffffff; border: 1px solid var(--av-border); border-radius: 12px; color: var(--av-text-subtle);">
+            <i class="bi bi-inbox fs-1 mb-3 d-block"></i>
+            <h5>Check back soon</h5>
+            <p class="mb-0">Collectors haven't listed any public items recently.</p>
+        </div>
+    }
+    else
+    {
+        <div class="showcase-row-container position-relative">
+            <button class="scroller-btn prev" onclick="document.getElementById('showcaseScroll').scrollBy({left: -420, behavior: 'smooth'})">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="scroller-btn next" onclick="document.getElementById('showcaseScroll').scrollBy({left: 420, behavior: 'smooth'})">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            
+            <div class="showcase-row" id="showcaseScroll">
+                @foreach (var item in Model.RecentItems)
+                {
+                    <a asp-page="/Browse/Details" asp-route-id="@item.ItemId" class="showcase-card">
+                        <partial name="_ItemTile" model="@((item.ItemId, item.Categories.FirstOrDefault()?.CategoryCode ?? "ART", false, item.HasImage, item.ItemName))" />
+                        <div style="padding: 0.875rem;">
+                            <div style="font-size: 0.9375rem; font-weight: 600; color: var(--av-text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 0.5rem; line-height: 1.4;">
+                                @item.ItemName
+                            </div>
+                            <div class="mb-2">
+                                @if (item.Categories.Any())
+                                {
+                                    <span class="badge border bg-light text-dark fw-normal">@item.Categories.First().CategoryName</span>
+                                }
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div style="font-size: 0.8125rem; color: var(--av-text-subtle);">
+                                    <div class="mb-1"><i class="bi bi-person"></i> @item.UserName</div>
+                                    <div>Qty @item.CurrentQuantity of @item.StartingQuantity</div>
+                                </div>
+                                @if (item.CurrentQuantity <= item.StartingQuantity * 0.2)
+                                {
+                                    <span class="badge" style="background-color: var(--av-danger-soft); color: var(--av-danger); border: 1px solid var(--av-danger);">Low</span>
+                                }
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- PROMO TILES -->
+<div class="row g-4 mb-5 fade-in">
+    <div class="col-md-6">
+        <div class="promo-tile" style="background: linear-gradient(115deg, #1e293b, #334155);">
+            <div class="pe-4" style="width: 60%; z-index: 2;">
+                <div class="slide-eyebrow" style="color: rgba(255,255,255,0.6);">ANALYTICS</div>
+                <h3 class="fw-bold mb-3" style="font-size: 1.5rem;">Track depletion across your vault</h3>
+                @if (!User.Identity?.IsAuthenticated ?? true)
+                {
+                    <a asp-page="/Account/Login" class="btn btn-hero-secondary btn-sm px-3 py-2">Open dashboard</a>
+                }
+                else
+                {
+                    <a asp-page="/Dashboard/Index" class="btn btn-hero-secondary btn-sm px-3 py-2">Open dashboard</a>
+                }
+            </div>
+            <div class="position-absolute overflow-hidden" style="right: 0; top: 0; bottom: 0; width: 40%; border-radius: 0 14px 14px 0;">
+                <div class="hero-art-fanned position-absolute" style="top: 25px; right: -20px; opacity: 0.35;">
+                    <div class="position-absolute" style="right: 80px; transform: rotate(-10deg);">
+                        <partial name="_ItemTile" model="@((0, "CARDS", true, false, ""))" />
+                    </div>
+                    <div class="position-absolute" style="right: 40px; transform: rotate(0deg); z-index: 2;">
+                        <partial name="_ItemTile" model="@((0, "COINS", true, false, ""))" />
+                    </div>
+                    <div class="position-absolute" style="right: 0px; transform: rotate(10deg); z-index: 3;">
+                        <partial name="_ItemTile" model="@((0, "BOOKS", true, false, ""))" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="promo-tile" style="background: linear-gradient(115deg, #7c2d12, #b45309);">
+            <div class="pe-4" style="width: 60%; z-index: 2;">
+                <div class="slide-eyebrow" style="color: rgba(255,255,255,0.6);">ORGANISE</div>
+                <h3 class="fw-bold mb-3" style="font-size: 1.5rem;">Six categories, infinite combinations</h3>
+                <a asp-page="/Browse/Index" class="btn btn-hero-secondary btn-sm px-3 py-2">Browse</a>
+            </div>
+            <div class="position-absolute overflow-hidden" style="right: 0; top: 0; bottom: 0; width: 40%; border-radius: 0 14px 14px 0;">
+                <div class="hero-art-fanned position-absolute" style="top: 25px; right: -20px; opacity: 0.35;">
+                    <div class="position-absolute" style="right: 80px; transform: rotate(-10deg);">
+                        <partial name="_ItemTile" model="@((0, "ART", true, false, ""))" />
+                    </div>
+                    <div class="position-absolute" style="right: 40px; transform: rotate(0deg); z-index: 2;">
+                        <partial name="_ItemTile" model="@((0, "CARDS", true, false, ""))" />
+                    </div>
+                    <div class="position-absolute" style="right: 0px; transform: rotate(10deg); z-index: 3;">
+                        <partial name="_ItemTile" model="@((0, "STAMPS", true, false, ""))" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

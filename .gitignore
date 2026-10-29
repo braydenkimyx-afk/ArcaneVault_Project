@@ -1,0 +1,26 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+*.user
+
+# IDE
+.vs/
+.vscode/
+*.suo
+
+# SQLite database (recreated automatically on first run via EF Core migrations)
+*.db
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Scratch/debug files
+dump.txt
+dump2.html
+testchart.html

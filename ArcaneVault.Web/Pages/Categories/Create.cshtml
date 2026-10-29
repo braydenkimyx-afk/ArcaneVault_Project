@@ -1,0 +1,32 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.Categories.CreateModel
+@{ ViewData["Title"] = "Create Category"; }
+
+<div class="row justify-content-center fade-in"><div class="col-md-6">
+    <div class="card shadow">
+        <div class="card-header py-3"><h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>New Category</h4></div>
+        <div class="card-body p-4">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <div class="mb-3">
+                    <label asp-for="Input.CategoryCode" class="form-label"></label>
+                    <input asp-for="Input.CategoryCode" class="form-control" placeholder="e.g. TOYS" style="text-transform:uppercase;" />
+                    <span asp-validation-for="Input.CategoryCode" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="Input.CategoryName" class="form-label"></label>
+                    <input asp-for="Input.CategoryName" class="form-control" placeholder="e.g. Toys & Action Figures" />
+                    <span asp-validation-for="Input.CategoryName" class="text-danger"></span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-2"></i>Create</button>
+                    <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div></div>

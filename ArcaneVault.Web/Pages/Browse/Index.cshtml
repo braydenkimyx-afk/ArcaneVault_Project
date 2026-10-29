@@ -1,0 +1,222 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.Browse.IndexModel
+@{
+    ViewData["Title"] = "Browse the vault";
+    var startItem = (Model.Result.Page - 1) * Model.Result.PageSize + 1;
+    if (Model.Result.TotalCount == 0) startItem = 0;
+    var endItem = Math.Min(Model.Result.Page * Model.Result.PageSize, Model.Result.TotalCount);
+}
+
+@section Scripts {
+    <style>
+        .av-browse-card {
+            background: #ffffff;
+            border: 1px solid var(--av-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .av-browse-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--av-accent-border);
+            box-shadow: 0 8px 24px rgba(37,99,235,.12);
+        }
+        .av-browse-card .av-tile {
+            width: 100%;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .av-browse-info {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .av-item-name {
+            font-weight: 600;
+            color: var(--av-text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+        /* Loader Skeleton */
+        #browseGrid.loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+    <script>
+        document.getElementById('browseFilterForm').addEventListener('submit', function() {
+            document.getElementById('browseGrid').classList.add('loading');
+        });
+        document.querySelectorAll('.filter-auto-submit').forEach(el => {
+            el.addEventListener('change', function() {
+                document.getElementById('browseFilterForm').submit();
+            });
+        });
+    </script>
+}
+
+<div class="container py-4 fade-in">
+    <div class="mb-4">
+        <h1 class="mb-0 fw-bold" style="color: var(--av-text);">Browse the vault</h1>
+        <p style="color: var(--av-text-subtle); margin-top: 0.25rem;">See what the community is cataloguing</p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card p-3 mb-4" style="background-color: var(--av-surface); border-color: var(--av-border);">
+        <form method="get" id="browseFilterForm" class="row gx-2 gy-2 align-items-center">
+            <div class="col-md-5">
+                <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search items, users, or categories..." />
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select filter-auto-submit">
+                    <option value="">All categories</option>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        var selected = Model.Category == cat.CategoryCode ? "selected" : "";
+                        <!option value="@cat.CategoryCode" @selected>@cat.CategoryName</!option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="sort" class="form-select filter-auto-submit">
+                    <!option value="newest" @(Model.Sort == "newest" ? "selected" : "")>Newest First</!option>
+                    <!option value="name" @(Model.Sort == "name" ? "selected" : "")>Name (A-Z)</!option>
+                    <!option value="quantity" @(Model.Sort == "quantity" ? "selected" : "")>Highest Quantity</!option>
+                    <!option value="price_asc" @(Model.Sort == "price_asc" ? "selected" : "")>Price (Low → High)</!option>
+                    <!option value="price_desc" @(Model.Sort == "price_desc" ? "selected" : "")>Price (High → Low)</!option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+            </div>
+            <div class="col-12">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="text-muted small">Price range:</span>
+                    <div class="input-group input-group-sm" style="max-width: 160px;">
+                        <span class="input-group-text">$</span>
+                        <input type="number" name="minPrice" value="@(Model.MinPrice.HasValue ? Model.MinPrice.Value.ToString() : "")" class="form-control" placeholder="Min" min="0" step="0.01" />
+                    </div>
+                    <span class="text-muted small">–</span>
+                    <div class="input-group input-group-sm" style="max-width: 160px;">
+                        <span class="input-group-text">$</span>
+                        <input type="number" name="maxPrice" value="@(Model.MaxPrice.HasValue ? Model.MaxPrice.Value.ToString() : "")" class="form-control" placeholder="Max" min="0" step="0.01" />
+                    </div>
+                    @if (Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+                    {
+                        <a href="?search=@Uri.EscapeDataString(Model.Search ?? "")&category=@Uri.EscapeDataString(Model.Category ?? "")&sort=@Uri.EscapeDataString(Model.Sort ?? "")" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x"></i> Clear price</a>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Result.TotalCount > 0)
+    {
+        <div class="mb-3 text-muted text-end" style="font-size: 0.9rem;">
+            Showing @startItem&ndash;@endItem of @Model.Result.TotalCount items
+        </div>
+
+        <div id="browseGrid" class="row grid-container" style="row-gap: 1.5rem;">
+            @foreach (var item in Model.Result.Items)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+                    <a href="/Browse/Details?id=@item.ItemId" class="av-browse-card">
+                        <partial name="_ItemTile" model="@((item.ItemId, item.Categories.FirstOrDefault()?.CategoryCode ?? "ART", false, item.HasImage, item.ItemName))" />
+                        <div class="av-browse-info">
+                            <div class="av-item-name">@item.ItemName</div>
+                            <div class="mb-2">
+                                @if (item.Categories.Any())
+                                {
+                                    <span class="badge border bg-light text-dark fw-normal">@item.Categories.First().CategoryName</span>
+                                }
+                            </div>
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-end">
+                                <div>
+                                    <div style="font-size: 0.8125rem; color: var(--av-text-muted);" class="mb-1"><i class="bi bi-person"></i> @item.UserName</div>
+                                    <div style="font-size: 0.8125rem; color: var(--av-text-subtle);">Qty @item.CurrentQuantity of @item.StartingQuantity</div>
+                                </div>
+                                <div class="d-flex flex-column align-items-end gap-1">
+                                    @if (item.Price.HasValue)
+                                    {
+                                        <span class="fw-bold" style="color: var(--av-accent); font-size: 0.95rem;">@item.Price.Value.ToString("C")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted" style="font-size: 0.8125rem;">No price</span>
+                                    }
+                                    @if (item.CurrentQuantity <= item.StartingQuantity * 0.2)
+                                    {
+                                        <span class="badge" style="background-color: var(--av-danger-soft); color: var(--av-danger); border: 1px solid var(--av-danger);">Low</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.Result.TotalPages > 1)
+        {
+            <nav class="mt-5 d-flex justify-content-center">
+                <ul class="pagination">
+                    <li class="page-item @(Model.Result.Page == 1 ? "disabled" : "")">
+                        <a class="page-link" href="?search=@Uri.EscapeDataString(Model.Search ?? "")&category=@Uri.EscapeDataString(Model.Category ?? "")&sort=@Uri.EscapeDataString(Model.Sort ?? "")&minPrice=@(Model.MinPrice.HasValue ? Model.MinPrice.Value.ToString() : "")&maxPrice=@(Model.MaxPrice.HasValue ? Model.MaxPrice.Value.ToString() : "")&page=@(Model.Result.Page - 1)">Previous</a>
+                    </li>
+                    
+                    @for (int i = 1; i <= Model.Result.TotalPages; i++)
+                    {
+                        if (i == 1 || i == Model.Result.TotalPages || (i >= Model.Result.Page - 2 && i <= Model.Result.Page + 2))
+                        {
+                            <li class="page-item @(i == Model.Result.Page ? "active" : "")">
+                                <a class="page-link" href="?search=@Uri.EscapeDataString(Model.Search ?? "")&category=@Uri.EscapeDataString(Model.Category ?? "")&sort=@Uri.EscapeDataString(Model.Sort ?? "")&minPrice=@(Model.MinPrice.HasValue ? Model.MinPrice.Value.ToString() : "")&maxPrice=@(Model.MaxPrice.HasValue ? Model.MaxPrice.Value.ToString() : "")&page=@i">@i</a>
+                            </li>
+                        }
+                        else if (i == 2 || i == Model.Result.TotalPages - 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                    }
+
+                    <li class="page-item @(Model.Result.Page == Model.Result.TotalPages ? "disabled" : "")">
+                        <a class="page-link" href="?search=@Uri.EscapeDataString(Model.Search ?? "")&category=@Uri.EscapeDataString(Model.Category ?? "")&sort=@Uri.EscapeDataString(Model.Sort ?? "")&minPrice=@(Model.MinPrice.HasValue ? Model.MinPrice.Value.ToString() : "")&maxPrice=@(Model.MaxPrice.HasValue ? Model.MaxPrice.Value.ToString() : "")&page=@(Model.Result.Page + 1)">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <!-- Empty States -->
+        <div class="text-center py-5" style="background: #ffffff; border: 1px solid var(--av-border); border-radius: 12px; margin-top: 2rem;">
+            <i class="bi bi-search display-1 text-muted mb-3 opacity-50"></i>
+            @if (!string.IsNullOrWhiteSpace(Model.Search) || !string.IsNullOrWhiteSpace(Model.Category))
+            {
+                <h3 class="fw-bold" style="color: var(--av-text);">No matching items found.</h3>
+                <p style="color: var(--av-text-subtle);">We couldn't find any items matching your filters.</p>
+                <a href="/Browse" class="btn btn-outline-primary mt-3">Clear filters</a>
+            }
+            else
+            {
+                <h3 class="fw-bold" style="color: var(--av-text);">The vault is currently empty.</h3>
+                <p style="color: var(--av-text-subtle);">No items have been catalogued on the platform yet.</p>
+            }
+        </div>
+    }
+</div>

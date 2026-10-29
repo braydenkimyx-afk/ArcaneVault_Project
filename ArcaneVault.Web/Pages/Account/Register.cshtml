@@ -1,0 +1,337 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page
+@model ArcaneVault.Web.Pages.Account.RegisterModel
+@{ 
+    ViewData["Title"] = "Create Account"; 
+}
+
+@section Scripts {
+    <style>
+        /* TCGplayer-style layout overrides */
+        main.container { max-width: 100%; padding: 0 !important; margin: 0; }
+        
+        .split-layout {
+            display: flex;
+            align-items: stretch;
+            margin-top: -1.5rem; /* negate default layout container top padding only */
+            background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        .auth-left-panel {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 4rem;
+            color: #ffffff;
+        }
+
+        .auth-brand-logo {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-illustration {
+            text-align: center;
+        }
+
+        .hero-illustration i {
+            font-size: 14rem;
+            color: #ffc107;
+            text-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            display: block;
+            margin-bottom: 2rem;
+            animation: float-simple 4s ease-in-out infinite;
+        }
+
+        @@keyframes float-simple {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .auth-right-panel {
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+        }
+
+        /* Right Panel Form Specs */
+        .auth-form-card {
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+            color: var(--av-text);
+        }
+        
+        .auth-heading { 
+            font-size: 1.75rem; 
+            color: var(--av-text); 
+            margin-bottom: 2.5rem; 
+            font-weight: 700; 
+        }
+
+        .auth-label { 
+            color: var(--av-text); 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            margin-bottom: 0.4rem; 
+            display: block; 
+        }
+        
+        .auth-input {
+            background: #ffffff;
+            border: 1px solid var(--av-border-strong);
+            color: var(--av-text);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            outline: none !important;
+        }
+        
+        .auth-input:focus {
+            border-color: var(--av-accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        
+        .auth-link {
+            color: var(--av-accent);
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+        
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-btn {
+            background: var(--av-accent);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            width: 100%;
+            border: none;
+            transition: background 0.2s;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+        
+        .auth-btn:hover:not(:disabled) { 
+            background: var(--av-accent-hover); 
+        }
+        
+        .auth-val-msg { 
+            color: var(--av-danger); 
+            font-size: 0.8125rem; 
+            margin-top: 0.25rem; 
+            display: block; 
+        }
+        
+        .auth-api-alert {
+            background: #f8d7da;
+            border: 1px solid #f5c2c7;
+            color: #842029;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Password Strength Meter */
+        .pw-meter {
+            display: flex;
+            gap: 4px;
+            margin-top: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .pw-seg {
+            height: 4px;
+            flex: 1;
+            border-radius: 2px;
+            background: var(--av-border-strong);
+            transition: background 0.3s;
+        }
+        .pw-check {
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 0.2rem;
+            color: var(--av-text-subtle);
+            transition: color 0.3s;
+        }
+        .pw-check.met { color: var(--av-success); }
+
+        .auth-cross-link { 
+            font-size: 0.85rem; 
+            text-align: center; 
+            margin-top: 2rem; 
+            color: var(--av-text-subtle);
+        }
+
+        .spinner-border-sm { display: none; width: 1.2rem; height: 1.2rem; margin-right: 0.5rem; }
+        .btn-loading .spinner-border-sm { display: inline-block; }
+        .btn-loading .btn-text { display: none; }
+
+        /* Hero tile overrides: fixed width + gem watermark */
+        .hero-illustration .av-tile {
+            width: 140px;
+        }
+        .hero-illustration .av-tile i {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.25) !important;
+        }
+        /* Force gem glyph regardless of category icon class */
+        .hero-illustration .av-tile i::before {
+            content: "\F3A1"; /* bi-gem */
+        }
+    </style>
+}
+
+<div class="split-layout">
+    <!-- Left panel -->
+    <div class="col-lg-4 d-none d-lg-flex auth-left-panel">
+        <div class="auth-brand-logo">
+            <i class="bi bi-gem me-2" style="color: #ffc107;"></i> ArcaneVault
+        </div>
+        
+        <div class="hero-illustration fade-in position-relative" style="width: 300px; height: 260px;">
+            <div class="position-absolute" style="left: -30px; top: 80px; transform: rotate(-15deg); z-index: 1;">
+                <partial name="_ItemTile" model="@((0, "FIGS", false, false, ""))" />
+            </div>
+            <div class="position-absolute" style="left: 70px; top: 40px; transform: rotate(0deg); z-index: 2; box-shadow: 0 15px 35px rgba(0,0,0,0.35);">
+                <partial name="_ItemTile" model="@((0, "CARDS", false, false, ""))" />
+            </div>
+            <div class="position-absolute" style="left: 170px; top: 60px; transform: rotate(15deg); z-index: 3;">
+                <partial name="_ItemTile" model="@((0, "COINS", false, false, ""))" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="col-lg-8 col-12 auth-right-panel">
+        <div class="auth-form-card fade-in">
+            
+            <h2 class="auth-heading">Join ArcaneVault</h2>
+            
+            <form method="post" id="registerForm" onsubmit="return submitForm(this);">
+                <div asp-validation-summary="ModelOnly" class="auth-api-alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.UserName" class="auth-label">Username</label>
+                    <input asp-for="Input.UserName" class="auth-input" autocomplete="username" spellcheck="false" />
+                    <span asp-validation-for="Input.UserName" class="auth-val-msg"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="auth-label">Email</label>
+                    <input asp-for="Input.Email" class="auth-input" type="email" autocomplete="email" />
+                    <span asp-validation-for="Input.Email" class="auth-val-msg"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="auth-label">Password</label>
+                    <input asp-for="Input.Password" class="auth-input pe-5" type="password" id="passwordInput" autocomplete="new-password" />
+                    <span asp-validation-for="Input.Password" class="auth-val-msg"></span>
+                    
+                    <div class="pw-meter" id="pwMeter">
+                        <div class="pw-seg seg-1"></div>
+                        <div class="pw-seg seg-2"></div>
+                        <div class="pw-seg seg-3"></div>
+                        <div class="pw-seg seg-4"></div>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <span class="pw-check" id="chk-len"><i class="bi bi-x-circle me-1"></i>8+ characters</span>
+                        <span class="pw-check" id="chk-up"><i class="bi bi-x-circle me-1"></i>Uppercase letter</span>
+                        <span class="pw-check" id="chk-num"><i class="bi bi-x-circle me-1"></i>Number</span>
+                        <span class="pw-check" id="chk-sp"><i class="bi bi-x-circle me-1"></i>Special character</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.ConfirmPassword" class="auth-label">Confirm Password</label>
+                    <input asp-for="Input.ConfirmPassword" class="auth-input pe-5" type="password" id="confirmPasswordInput" autocomplete="new-password" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="auth-val-msg"></span>
+                </div>
+
+                <button type="submit" class="auth-btn" id="submitBtn">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="btn-text">Create Account</span>
+                </button>
+            </form>
+            
+            <div class="auth-cross-link">
+                Already have an account?<br/>
+                <a asp-page="Login" class="auth-link">Sign in here</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const pwInput = document.getElementById('passwordInput');
+    if(pwInput) {
+        pwInput.addEventListener('input', function() {
+            const p = this.value;
+            let score = 0;
+            
+            const checks = [
+                { id: 'chk-len', regex: /.{8,}/ },
+                { id: 'chk-up', regex: /[A-Z]/ },
+                { id: 'chk-num', regex: /[0-9]/ },
+                { id: 'chk-sp', regex: /[^A-Za-z0-9]/ }
+            ];
+
+            checks.forEach(check => {
+                const el = document.getElementById(check.id);
+                const i = el.querySelector('i');
+                if (check.regex.test(p)) {
+                    score++;
+                    el.classList.add('met');
+                    i.className = 'bi bi-check-circle me-1';
+                } else {
+                    el.classList.remove('met');
+                    i.className = 'bi bi-x-circle me-1';
+                }
+            });
+
+            const segs = document.querySelectorAll('.pw-seg');
+            segs.forEach(s => s.style.background = 'var(--av-border-strong)');
+            
+            let color = score <= 2 ? 'var(--av-danger)' : (score === 3 ? 'var(--av-warning)' : 'var(--av-success)');
+            
+            for(let j=0; j<score; j++) {
+                segs[j].style.background = color;
+            }
+        });
+    }
+
+    function submitForm(form) {
+        if ($(form).valid()) {
+            const btn = document.getElementById('submitBtn');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+            return true;
+        }
+        return false;
+    }
+</script>

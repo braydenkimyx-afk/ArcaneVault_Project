@@ -1,0 +1,27 @@
+@* Name: Brayden Kim *@
+@* Student Admin No: 252268E *@
+@* Tutorial Group: 07 *@
+
+@page "{code}"
+@model ArcaneVault.Web.Pages.Categories.DetailsModel
+@{ ViewData["Title"] = "Category Details"; }
+
+<div class="row justify-content-center fade-in"><div class="col-md-6">
+    <div class="card shadow">
+        <div class="card-header py-3"><h4 class="mb-0" style="color: var(--av-text);"><i class="bi bi-tag me-2"></i>Category Details</h4></div>
+        <div class="card-body p-4">
+            @if (Model.Category == null) { <div class="alert alert-warning">Category not found.</div> }
+            else
+            {
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Code</dt><dd class="col-sm-8"><span class="badge badge-category">@Model.Category.CategoryCode</span></dd>
+                    <dt class="col-sm-4">Name</dt><dd class="col-sm-8">@Model.Category.CategoryName</dd>
+                </dl>
+            }
+        </div>
+        <div class="card-footer d-flex gap-2">
+            <a asp-page="Edit" asp-route-code="@Model.Category?.CategoryCode" class="btn btn-warning btn-sm"><i class="bi bi-pencil me-1"></i>Edit</a>
+            <a asp-page="Index" class="btn btn-secondary btn-sm">Back</a>
+        </div>
+    </div>
+</div></div>
